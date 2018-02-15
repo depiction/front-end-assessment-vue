@@ -64,7 +64,6 @@ export default {
 	data () {
 		return {
 			launches: [],
-			filteredLaunches: [],
 			showNotification: false,
 			sortOrder: 'desc',
 			loaded: false,
@@ -92,58 +91,13 @@ export default {
 	computed: {
 		launchData: function() {
 			return (this.filteredLaunches) ? this.filteredLaunches : this.launches;
-		}
-	},
-	methods: {
-		getLaunches (notify = false) {
-			axios.get('https://api.spacexdata.com/v2/launches')
-				.then(res => {
-					this.loaded = true;
-					this.launches = orderBy(res.data, 'launch_date_local', this.sortOrder);
-					this.showNotification = (notify) ? true : false;
-					this.filteredLaunches = this.filter(this.launches, this.checkedFilters);
-
-					if (notify) {
-						setTimeout(() => {
-							this.showNotification = false;
-						}, 1500);
-					}
-
-				})
-				.catch(e => {
-					this.serviceError = true;
-				})
 		},
-
-		toggleSort () {
-			this.sortOrder = (this.sortOrder === 'asc') ? 'desc' : 'asc';
-			this.launches = orderBy(this.launches, 'launch_date_local', this.sortOrder);
-
-			if(this.filteredLaunches) {
-				this.filteredLaunches = orderBy(this.filteredLaunches, 'launch_date_local', this.sortOrder);
-			}
-		},
-
-		updateFilters(option, event) {
-			if (event.target.checked) {
-				this.checkedFilters.push(option.value);
-			} else {
-				this.filterOptions.forEach((item, index) => {
-					if (this.checkedFilters[index] == option.value) {
-						this.checkedFilters.splice(index, 1);
-					}
-				})
-			}
-
-			this.filteredLaunches = this.filter(this.launches, this.checkedFilters);
-		},
-
-		filter (launches, checkedFilters) {
-			if(checkedFilters.length) {
+		filteredLaunches () {
+			if(this.checkedFilters.length) {
 				return this.launches.filter(launch => {
 					let matches = [];
 
-					for(let filter of checkedFilters) {
+					for(let filter of this.checkedFilters) {
 						if(filter === 'launch_success') {
 							if(launch.launch_success) {
 								matches.push(true);
@@ -176,10 +130,47 @@ export default {
 						}
 					}
 
-					return (matches.length === checkedFilters.length);
+					return (matches.length === this.checkedFilters.length);
 				});
 			} else {
 				return null;
+			}
+		}
+	},
+	methods: {
+		getLaunches (notify = false) {
+			axios.get('https://api.spacexdata.com/v2/launches')
+				.then(res => {
+					this.loaded = true;
+					this.launches = orderBy(res.data, 'launch_date_local', this.sortOrder);
+					this.showNotification = (notify) ? true : false;
+
+					if (notify) {
+						setTimeout(() => {
+							this.showNotification = false;
+						}, 1500);
+					}
+
+				})
+				.catch(e => {
+					this.serviceError = true;
+				})
+		},
+
+		toggleSort () {
+			this.sortOrder = (this.sortOrder === 'asc') ? 'desc' : 'asc';
+			this.launches = orderBy(this.launches, 'launch_date_local', this.sortOrder);
+		},
+
+		updateFilters(option, event) {
+			if (event.target.checked) {
+				this.checkedFilters.push(option.value);
+			} else {
+				this.filterOptions.forEach((item, index) => {
+					if (this.checkedFilters[index] == option.value) {
+						this.checkedFilters.splice(index, 1);
+					}
+				})
 			}
 		}
 	}
