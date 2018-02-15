@@ -2,8 +2,7 @@ import Vue from 'vue'
 import 'intersection-observer';
 
 Vue.directive('lazy-load', {
-	// When the bound element is inserted into the DOM...
-	bind: function (el) {
+	bind (el) {
 		const config = {
 			rootMargin: '100% 0px'
 		};
@@ -21,8 +20,8 @@ Vue.directive('lazy-load', {
 	}
 })
 
-function preloadImage(img) {
+let preloadImage = ((img) => {
 	const src = img.getAttribute('data-src');
 	if (!src) { return; }
 	img.src = src;
-}
+})
