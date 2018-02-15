@@ -26,7 +26,7 @@
 						<th>Article</th>
 					</thead>
 					<tbody>
-						<tr v-for="(launch, flight_number) in launchData" :key="flight_number">
+						<tr v-for="(launch, flight_number) in (filteredLaunches || launches)" :key="flight_number">
 							<td data-label="Badge" class="badge">
 								<img :data-src="launch.links.mission_patch" v-if="launch.links.mission_patch" v-lazy-load />
 							</td>
@@ -89,9 +89,6 @@ export default {
 		this.getLaunches();
 	},
 	computed: {
-		launchData () {
-			return (this.filteredLaunches) ? this.filteredLaunches : this.launches;
-		},
 		filteredLaunches () {
 			if(this.checkedFilters.length) {
 				return this.launches.filter(launch => {
